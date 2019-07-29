@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="online.cangjie.core.dao.ProductDao">
+    <resultMap id="product" type="Product">
+        <result column="brand_id" property="brandId" />
+        <result column="is_show" property="isShow" />
+        <result column="create_time" property="createTime" />
+        <result column="is_del" property="isDel" />
+        <result column="is_hot" property="isHot"/>
+        <result column="is_new" property="isNew" />
+        <result column="img_url" property="imgUrl" />
+        <result column="is_commend" property="isCommend" />
+        <result column="package_list" property="packageList" />
+    </resultMap>
+    <select id="queryList" parameterType="ProductQuery" resultType="Product"  resultMap="product">
+        select * from bbs_product
+        <where>
+            <if test="name != null or name != '' or name != 'null'">
+               name like '%${name}%'
+            </if>
+            <if test="brandId != null">
+                and brand_id = #{brandId}
+            </if>
+            <if test="isShow != null">
+                and is_show = #{isShow}
+            </if>
+        </where>
+            <if test="startRow != null">
+                limit #{startRow}, #{pageSize}
+            </if>
+    </select>
+
+    <select id="queryCount" parameterType="Product" resultType="int">
+        select COUNT(id) as num from bbs_product
+        <where>
+            <if test="name != null or name != '' or name != 'null'">
+                name like '%${name}%'
+            </if>
+            <if test="brandId != null">
+                and brand_id = #{brandId}
+            </if>
+            <if test="isShow != null">
+                and is_show = #{isShow}
+            </if>
+        </where>
+    </select>
+
+
+
+    <insert id="insertOne" parameterType="Product">
+        insert into bbs_product(id, brand_id, name, weight, is_new, is_hot, is_commend, is_show, img_url, is_del, description, package_list, colors, sizes, create_time)
+        value(#{id}, #{brandId}, #{name}, #{weight},
+        <if test="isNew != null">
+            #{isNew}
+        </if>
+        <if test="isNew == null">
+            0
+        </if>
+        ,
+        <if test="isHot != null">
+            #{isHot}
+        </if>
+        <if test="isHot == null">
+            0
+        </if>
+        ,
+        <if test="isCommend != null">
+            #{isCommend}
+        </if>
+        <if test="isCommend == null">
+            0
+        </if>
+        , 0, #{imgUrl}, #{isDel}, #{description}, #{packageList}, #{colors}, #{sizes}, now())
+    </insert>
+    
+    <update id="updateIsShow">
+        update bbs_product set is_show = #{type} where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteProductByIds" parameterType="list">
+        delete from bbs_product where id in
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="queryOne" parameterType="int" resultType="Product" resultMap="product">
+        select * from bbs_product
+        <where>
+            id = #{id}
+        </where>
+    </select>
+
+    <select id="queryProductNameByProductSkuIds" parameterType="long" resultType="Product" resultMap="product">
+        select * from bbs_product where id in (select product_id from bbs_sku where bbs_sku.id = #{skuId}
+        )
+    </select>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="online.cangjie.core.dao.BrandDao">
+    <resultMap id="brand" type="Brand">
+        <result column="is_display" property="isDisplay"></result>
+        <result column="img_url" property="imgUrl"></result>
+        <result column="web_site" property="webSite"></result>
+    </resultMap>
+    <select id="query" parameterType="BrandQuery" resultType="Brand" resultMap="brand">
+        select * from bbs_brand
+        <where>
+            <if test="name != null or name != '' or name != 'null'">
+                name like '%${name}%'
+            </if>
+            <if test="isDisplay != null">
+                and is_display = #{isDisplay}
+            </if>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+        </where>
+        <if test="startRow != null">
+            limit #{startRow}, #{pageSize}
+        </if>
+    </select>
+
+    <insert id="insertOne" parameterType="Brand" keyProperty="id" useGeneratedKeys="true">
+        insert into bbs_brand(name, description, img_url, web_site, sort, is_display) value(#{name}, #{description}, #{imgUrl}, #{webSite}, #{sort}, #{isDisplay})
+    </insert>
+
+    <insert id="insertList" parameterType="list">
+        insert into bbs_brand(name, description, img_url, web_site, sort, is_display) values
+        <foreach collection="list" open="(" close=")" item="brand" separator=",">
+            #{brand.name}, #{brand.description}, #{brand.img_url}, #{brand.webSite}, #{brand.sort}, #{brand.isDisplay}
+        </foreach>
+    </insert>
+
+    <update id="updateOne" parameterType="Brand">
+        update bbs_brand set name = #{name},description = #{description},
+        <if test="img_url != null">
+            img_url = #{imgUrl},
+        </if>
+         web_site = #{webSite}, sort = #{sort}, is_display = #{isDisplay} where id = #{id}
+    </update>
+
+    <select id="queryCount" parameterType="Brand" resultType="int">
+        select Count(id) from bbs_brand
+        <where>
+            <if test="name != null or name != '' or name != 'null'">
+                name like '%${name}%'
+            </if>
+            <if test="isDisplay != null">
+                and is_display = #{isDisplay}
+            </if>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryOne" parameterType="long" resultType="Brand">
+        select * from bbs_brand where id = #{id}
+    </select>
+
+    <select id="queryByProduct" parameterType="list" resultType="map" >
+        select id, name from bbs_brand where id in(select brand_id from bbs_product where bbs_product.id in
+        <foreach collection="list" open="(" close=")" item="ids" separator=",">
+            #{ids}
+        </foreach>
+        )
+    </select>
+
+    <delete id="delete" parameterType="list">
+        delete from bbs_brand where id in (
+        <foreach collection="list" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+</mapper>

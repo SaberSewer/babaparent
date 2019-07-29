@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="online.cangjie.core.dao.SkuDao">
+    <resultMap id="sku" type="Sku">
+        <result column="market_price" property="marketPrice" />
+        <result column="delive_free" property="deliveFree" />
+        <result column="upper_limit" property="upperLimit" />
+        <result column="create_time" property="createTime" />
+        <result column="product_id" property="productId" />
+        <result column="color_id" property="colorId" />
+    </resultMap>
+    <select id="queryAll" parameterType="SkuQuery" resultType="map">
+        select bbs_sku.id, product_id, color_id, size, market_price, price, delive_fee, stock, upper_limit, create_time, bbs_color.name from bbs_sku left join bbs_color on color_id = bbs_color.id
+        <where>
+            product_id = #{productId}
+        </where>
+        <if test="startRow != null">
+            limit #{startRow}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="queryCount" parameterType="Sku" resultType="int">
+        select COUNT(id) from bbs_sku
+        <where>
+            product_id = #{productId}
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="list">
+        insert into bbs_sku(product_id, color_id, size, market_price, price, delive_fee, stock, create_time, upper_limit) values
+        <foreach collection="list" separator="," item="sku">
+            (#{sku.productId}, #{sku.colorId}, #{sku.size}, 0, 0, 10, 200, now(), #{sku.upperLimit})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="Sku">
+        update bbs_sku set market_price = #{marketPrice}, price = #{price}, stock = #{stock}, upper_limit = #{upperLimit} where id = #{id}
+    </update>
+
+    <select id="queryPriceByProductId" parameterType="long" resultType="float">
+        select price from bbs_sku where product_id = #{id} and stock > 0 order by price asc limit 0, 1
+    </select>
+
+    <delete id="deleteByProductId" parameterType="list">
+        delete from bbs_sku where product_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="querySkuByProductId" parameterType="long" resultType="map">
+       SELECT * FROM bbs_sku left join bbs_color on bbs_sku.color_id = bbs_color.id  where product_id = #{id} and stock > 0
+    </select>
+
+    <select id="querySkuSizeByProductIdAndColorId" parameterType="long" resultType="Sku" resultMap="sku">
+        select * from bbs_sku where product_id = #{productId} and color_id = #{colorId}
+    </select>
+
+    <select id="querySkuPriceByProductIdAndColorIdAndSize" resultType="float">
+        select price from bbs_sku where product_id = #{productId} and color_id = #{colorId} and size = #{size}
+    </select>
+
+    <select id="querySkuBySkuIds" resultType="Sku" resultMap="sku">
+        select * from bbs_sku where id in
+        <foreach collection="array" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="online.cangjie.core.dao.ColorDao">
+    <resultMap id="color" type="Color">
+        <result column="parent_id" property="parentId" />
+        <result column="img_url" property="imgUrl" />
+    </resultMap>
+    <select id="queryAll" parameterType="ColorQuery" resultType="Color" resultMap="color">
+        select * from bbs_color
+        <where>
+            <if test="startRow != null">
+                limit #{startRow}, #{pageSize}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryColorNameBySkuId" resultType="string" parameterType="long">
+        select name from bbs_color where bbs_color.id = (select color_id from bbs_sku where bbs_sku.id = #{skuId})
+    </select>
+</mapper>
