@@ -39,7 +39,7 @@
     <!-- 设置统一控制版本 -->
     <properties>
         <java-version>1.8</java-version>
-        <junit-version>4.12</junit-version>
+        <junit-version>4.13.1</junit-version>
         <spring.version>4.2.6.RELEASE</spring.version>
         <jackson.version>2.4.2</jackson.version>
         <mysql-connector-java-version>8.0.15</mysql-connector-java-version>
